@@ -20,7 +20,7 @@
 
 extern const double eps;
 extern bool debug;
-const int MAX_DEP = 6;
+extern const int MAX_DEP;
 
 /*
     深度限制的

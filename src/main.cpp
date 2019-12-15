@@ -16,6 +16,7 @@
 #include "material.hpp"
 #include "hit.hpp"
 #include "kdtree.hpp"
+#include "light.hpp"
 
 #include <string>
 #include <array>
@@ -40,6 +41,7 @@ unsigned short X[3];
 bool debug = false;
 
 const double eps = 1e-6;
+const int MAX_DEP = 6;
 
 void pt(){
     const int PT_SAMP = 200;
@@ -83,7 +85,7 @@ void ppm(int argc, char *argv[]){
     PixelColor **c = new PixelColor*[thread_count];
     for (int i = 0; i < thread_count; ++i)
         c[i] = new PixelColor[limx * limy];
-    PixelColor *final = new PixelColor[limx * limy];
+    PixelColor *total = new PixelColor[limx * limy];
     PixelColor *temp = new PixelColor[limx * limy];
 
     std::vector<SPPMNode> *photon = new std::vector<SPPMNode>[thread_count];
@@ -107,7 +109,7 @@ void ppm(int argc, char *argv[]){
                         X[1] = y * x + y + sy + time(0);
                         X[2] = y * x * x + y + x + sx * sy + time(0);
                         std::vector<SPPMNode> tmp_sightpoint; 
-                        camera_pass(camRay, 0, y * limy + x, tmp_sightpoint);
+                        camera_pass(camRay, 0, y * limx + x, tmp_sightpoint, radius, baseGroup);
                         for (int i = 0, lim = tmp_sightpoint.size(); i < lim; ++i)
                             if (tmp_sightpoint[i].index >= 0){  // 视线的这个点可以在屏幕上显示
                                 tmp_sightpoint[i].radius = radius;
@@ -137,14 +139,37 @@ void ppm(int argc, char *argv[]){
                     printf("Iteration %5d sppm tracing %5.2f%%", 100.0 * (i+1) / samp_per_thread);
                 for (int j = 0; j < sceneParser->getNumLights(); ++j){
                     Light *light = sceneParser->getLight(j);
-                    tree.query(SPPMNode());
+                    double r1 = 2 * M_PI * erand48(X), r2 = erand48(X), r2s = sqrt(r2);
+                    Vector3f w = Vector3f(1, 0, 0), u = Vector3f(0, 1, 0), w = Vector3f(0, 0, 1);
+                    Vector3f d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).normalized();
+                    tree.query(SPPMNode(light->getPosition(), light->getColor(), d), c[th]);
+                    light_pass(Ray(light->getPosition(), d), 0, light->getColor(), c[th], tree, baseGroup);
                 }
-                
             }
         }
+
+        memset(temp, 0, sizeof temp);
+        for (int i = 0; i < thread_count; ++i){
+            for (int j = 0; j < limx * limy; ++j)
+                temp[j] += c[i][j];
+            memset(c[i], 0, sizeof c[i]);
+        }
+        printf("Iteration %5d generate photon complete.\n", iter);
+
+        for (int i = 0; i < limx * limy; ++i){
+            total[i] += temp[i] / temp[i].strength;
+            image->SetPixel(i % limx, i / limx, total[i].getColor());
+        }
+        image->SaveBMP(argv[2]);
+        printf("Iteration %5d save picture complete.\n", iter);
     }
 
     delete[] photon;
+    delete[] total;
+    delete[] temp;
+    for (int i = 0; i < thread_count; ++i)
+        delete[] c[i];
+    delete[] c;
 }
 
 int main(int argc, char *argv[]) {

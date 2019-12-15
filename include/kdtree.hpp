@@ -10,13 +10,12 @@ extern const double eps;
 struct SPPMNode {
     Vector3f point, color, normal;
     int index;  // 对应到图像数组的数组下标
-    double prob, radius;    // radius 是当前节点的影响距离 注意该距离不是球，而是边长为2radius的正方体
+    double radius;    // radius 是当前节点的影响距离 注意该距离不是球，而是边长为2radius的正方体
     SPPMNode() {
         index = -1; 
-        prob = 1;
     }
-    SPPMNode(Vector3f point, Vector3f color, Vector3f normal, double radius = 1, int index = -1, double prob = 1):
-        point(point), color(color), normal(normal), radius(radius), index(index), prob(prob) {}
+    SPPMNode(Vector3f point, Vector3f color, Vector3f normal, double radius = 1, int index = -1):
+        point(point), color(color), normal(normal), radius(radius), index(index) {}
 }
 
 struct PixelColor {
@@ -25,8 +24,8 @@ struct PixelColor {
 
     PixelColor(): strength(0), sumColor(0, 0, 0) {}
     PixelColor(double strength, Vector3f sumColor): strength(strength), sumColor(sumColor) {}
-    void add(Vector3f color, double st = 1.0) {
-        strength += st;
+    void add(Vector3f color) {
+        strength += 1.0;
         sumColor = sumColor + color;
     }
     Vector3f getColor() {
@@ -45,7 +44,7 @@ struct PixelColor {
         return PixelColor(p.strength + strength, p.sumColor + sumColor);
     }
     PixelColor operator / (double r) const {
-        return PixelColor(r / strength, r / sumColor);
+        return PixelColor(strength / r, sumColor / r);
     }
 };
 
@@ -101,7 +100,7 @@ private:
     void _query(const SPPMNode &n, PixelColor *c, int p) {
         if ((tree[p].sppm.point - n.point).squaredLength() <= sqr(tree[p].sppm.radius) && 
             Vector3f::dot(tree[p].sppm.normal, n.normal) >= 0)
-            c[tree[p].sppm.index].add(n.color * tree[p].sppm.color, n.prob);
+            c[tree[p].sppm.index].add(n.color * tree[p].sppm.color);
 
         double disl, disr;
         if (tree[p].lc > 0)

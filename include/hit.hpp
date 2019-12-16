@@ -89,8 +89,12 @@ public:
             (1.0 / material->getIota()) : material->getIota();  // Iota_i / Iota_t
         Vector3f I = incidence.normalized();
         Vector3f N = getIncidenceNormal().normalized();
+        Ray reflect(collision, (I - 2 * Vector3f::dot(I, N) * N).normalized());
         double costhetaI = fabs(Vector3f::dot(I, N));
-        double costhetaT = sqrt(1 - sqr(relativeIota) * (1 - sqr(costhetaI)));
+        double costhetaT2 = 1 - sqr(relativeIota) * (1 - sqr(costhetaI));
+        if (costhetaT2 <= 0)
+            return (GeneratedRays){reflect, Ray(collision, Vector3f::ZERO), 1.0, 0.0};
+        double costhetaT = sqrt(costhetaT2);
 
         double para, vert;
         para = (material->getIota() * costhetaI - costhetaT) / (material->getIota() * costhetaI + costhetaT);
@@ -98,7 +102,6 @@ public:
         double kr = 0.5 * (sqr(para) + sqr(vert));
         double kt = 1.0 - kr;
 
-        Ray reflect(collision, (I - 2 * Vector3f::dot(I, N) * N).normalized());
         Ray refract(collision, (relativeIota * I + (relativeIota * (-Vector3f::dot(I, N)) - costhetaT) * N).normalized());
         return (GeneratedRays){reflect, refract, kr, kt};
     }

@@ -75,13 +75,13 @@ void pt(){
 
 void ppm(int argc, char *argv[]){
     int ITER = atoi(argv[4]);
-    int radius = atoi(argv[5]);
-    int alpha = atoi(argv[6]);
-    int samp_count = atoi(argv[7]);
+    double radius = atof(argv[5]);
+    double alpha = atof(argv[6]);
 
     int thread_count = omp_get_num_procs();
     int limx = cam->getWidth();
     int limy = cam->getHeight();
+    int samp_count = atoi(argv[7]) * limx * limy;
     PixelColor **c = new PixelColor*[thread_count];
     for (int i = 0; i < thread_count; ++i)
         c[i] = new PixelColor[limx * limy];
@@ -89,6 +89,9 @@ void ppm(int argc, char *argv[]){
     PixelColor *temp = new PixelColor[limx * limy];
 
     std::vector<SPPMNode> *photon = new std::vector<SPPMNode>[thread_count];
+
+    int sight_point_count = 0;
+    int pixel_count = limx * limy;
 
     for (int iter = 0; iter < ITER; ++iter){
         printf("Iteration %5d start...\n", iter);
@@ -114,12 +117,14 @@ void ppm(int argc, char *argv[]){
                             if (tmp_sightpoint[i].index >= 0){  // 视线的这个点可以在屏幕上显示
                                 tmp_sightpoint[i].radius = radius;
                                 photon[thread_num].push_back(tmp_sightpoint[i]);
+                                ++sight_point_count;
                             }
                     }
             }
-            printf("Complete %d / %d\n", x, cam->getWidth());
+            if (thread_num == 0)
+                printf("Complete %d / %d\n", x, cam->getWidth());
         }
-        printf("Iteration %5d collect sight points complete.\n", iter);
+        printf("Iteration %5d collect sight points complete. \nTotal sight points = %d\nTotal Pixels = %d\n", iter, sight_point_count, pixel_count);
 
         std::vector<SPPMNode> tmpPhoton;
         for (int i = 0; i < thread_count; ++i)
@@ -128,6 +133,7 @@ void ppm(int argc, char *argv[]){
         printf("Iteration %5d build kdtree complete.\n", iter);
 
         int samp_per_thread = samp_count / thread_count + 1;
+        printf("Samp per thread %d\n", samp_per_thread);
         #pragma omp parallel for num_threads(thread_count) schedule(dynamic, 1)
         for (int th = 0; th < thread_count; ++th){
             X[0] = th;
@@ -136,12 +142,12 @@ void ppm(int argc, char *argv[]){
             int thread_num = omp_get_thread_num();
             for (int i = 0; i < samp_per_thread; ++i){
                 if (thread_num == 0 && i % 1000 == 0)
-                    printf("Iteration %5d sppm tracing %5.2f%%", 100.0 * (i+1) / samp_per_thread);
+                    printf("Iteration %5d sppm tracing %5.2f%%\n", iter, 100.0 * (i+1) / samp_per_thread);
                 for (int j = 0; j < sceneParser->getNumLights(); ++j){
                     Light *light = sceneParser->getLight(j);
-                    double r1 = 2 * M_PI * erand48(X), r2 = erand48(X), r2s = sqrt(r2);
-                    Vector3f w = Vector3f(1, 0, 0), u = Vector3f(0, 1, 0), w = Vector3f(0, 0, 1);
-                    Vector3f d = (u * cos(r1) * r2s + v * sin(r1) * r2s + w * sqrt(1 - r2)).normalized();
+                    Vector3f d = Vector3f::randomRay(Vector3f(0,0,1));
+                    if (erand48(X) < 0.5) d = -d;
+
                     tree.query(SPPMNode(light->getPosition(), light->getColor(), d), c[th]);
                     light_pass(Ray(light->getPosition(), d), 0, light->getColor(), c[th], tree, baseGroup);
                 }
@@ -151,13 +157,13 @@ void ppm(int argc, char *argv[]){
         memset(temp, 0, sizeof temp);
         for (int i = 0; i < thread_count; ++i){
             for (int j = 0; j < limx * limy; ++j)
-                temp[j] += c[i][j];
+                temp[j] = temp[j] + c[i][j];
             memset(c[i], 0, sizeof c[i]);
         }
         printf("Iteration %5d generate photon complete.\n", iter);
 
         for (int i = 0; i < limx * limy; ++i){
-            total[i] += temp[i] / temp[i].strength;
+            total[i] = total[i] + temp[i];
             image->SetPixel(i % limx, i / limx, total[i].getColor());
         }
         image->SaveBMP(argv[2]);
@@ -172,12 +178,14 @@ void ppm(int argc, char *argv[]){
     delete[] c;
 }
 
+const char args[][20] = {"Prog", "Input Filename", "Output Filename", "Render Mode", "Render Iterations", "Radius", "Alpha", "Samples Per Pixel"};
+
 int main(int argc, char *argv[]) {
 
     time_t tbegin, tend;
     time(&tbegin);
     for (int argNum = 1; argNum < argc; ++argNum) {
-        std::cout << "Argument " << argNum << " is: " << argv[argNum] << std::endl;
+        std::cout << "Argument " << args[argNum] << " is: " << argv[argNum] << std::endl;
     }
 
     if (argc < 4 || (strcmp(argv[3], "pt") != 0 && strcmp(argv[3], "ppm") != 0)) {

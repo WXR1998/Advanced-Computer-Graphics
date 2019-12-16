@@ -89,7 +89,7 @@ public:
 	Vector3f confine();
 	Vector3f exp();
 	double power();
-	bool isBlack();
+	bool isBlack() const;
 	Vector3f minimum(const Vector3f &a) const;
 	Vector3f maximum(const Vector3f &a) const;
 

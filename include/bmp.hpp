@@ -55,6 +55,7 @@ class Bmp {
     double stretchH, stretchW;
 
 	void Release(){
+        if (ima == nullptr) return;
         for ( int i = 0 ; i < strInfo.biHeight + 2; i++ )
             delete[] ima[i];
         delete[] ima;
@@ -106,7 +107,7 @@ public:
         strHead.bfSize = strInfo.biSizeImage + strInfo.biBitCount;
         
         ima = new IMAGEDATA*[H + 2];
-        for ( int i = 0 ; i < H ; i++ )
+        for ( int i = 0 ; i < H + 2 ; i++ )
             ima[i] = new IMAGEDATA[W + 2];
     }
 	void Input( std::string file ){

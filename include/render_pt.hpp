@@ -27,7 +27,7 @@ extern const int MAX_DEP;
     给定入射光线r，求其颜色
 */
 Vector3f getColor(const Ray &r, int dep, Group *baseGroup){
-    if (dep >= MAX_DEP)
+    if (dep >= MAX_DEP || r.getDirection().isBlack())
         return Vector3f::ZERO;
     Hit hit;
     bool isIntersect = baseGroup->intersect(r, hit, eps * 50);  // 由于浮点误差，tmin必须为一个正数，防止光线穿模

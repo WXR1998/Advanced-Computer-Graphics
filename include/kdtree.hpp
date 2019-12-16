@@ -10,13 +10,14 @@ extern const double eps;
 struct SPPMNode {
     Vector3f point, color, normal;
     int index;  // 对应到图像数组的数组下标
-    double radius;    // radius 是当前节点的影响距离 注意该距离不是球，而是边长为2radius的正方体
+    double radius, prob;    // radius 是当前节点的影响距离 注意该距离不是球，而是边长为2radius的正方体
     SPPMNode() {
+        prob = 1.0;
         index = -1; 
     }
-    SPPMNode(Vector3f point, Vector3f color, Vector3f normal, double radius = 1, int index = -1):
-        point(point), color(color), normal(normal), radius(radius), index(index) {}
-}
+    SPPMNode(Vector3f point, Vector3f color, Vector3f normal, double radius = 1, int index = -1, double prob = 1.0):
+        point(point), color(color), normal(normal), radius(radius), index(index), prob(prob) {}
+};
 
 struct PixelColor {
     double strength;
@@ -24,9 +25,9 @@ struct PixelColor {
 
     PixelColor(): strength(0), sumColor(0, 0, 0) {}
     PixelColor(double strength, Vector3f sumColor): strength(strength), sumColor(sumColor) {}
-    void add(Vector3f color) {
-        strength += 1.0;
-        sumColor = sumColor + color;
+    void add(Vector3f color, double prob = 1.0) {
+        strength += prob;
+        sumColor = sumColor + color * prob;
     }
     Vector3f getColor() {
         if (fabs(strength) < eps) return sumColor;
@@ -52,9 +53,9 @@ struct PixelColor {
     kd树用于保存所有遇到的漫反射点
 */
 class KDTree {
-private:
-    static int Dim;
+public:
     int size, root;
+    static int Dim;
     struct Node {
         SPPMNode sppm;
         Vector3f min, max;      // 保存这个kd树节点的包围盒的两个顶点
@@ -100,7 +101,7 @@ private:
     void _query(const SPPMNode &n, PixelColor *c, int p) {
         if ((tree[p].sppm.point - n.point).squaredLength() <= sqr(tree[p].sppm.radius) && 
             Vector3f::dot(tree[p].sppm.normal, n.normal) >= 0)
-            c[tree[p].sppm.index].add(n.color * tree[p].sppm.color);
+                c[tree[p].sppm.index].add(n.color * tree[p].sppm.color, n.prob * tree[p].sppm.prob);
 
         double disl, disr;
         if (tree[p].lc > 0)
@@ -132,12 +133,9 @@ private:
         }
     }
 
-public:
 
     KDTree(std::vector<SPPMNode> &nodes) {
         int s = nodes.size();
-        if (tree != nullptr)
-            delete[] tree;
         tree = new Node[s + 1];
         for (int i = 1; i <= s; ++i)
             tree[i].sppm = nodes[i-1];
@@ -161,5 +159,7 @@ public:
         _update(root);
     }
 };
+
+int KDTree::Dim = 0;
 
 #endif

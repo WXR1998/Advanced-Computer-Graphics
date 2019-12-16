@@ -86,8 +86,8 @@ void SceneParser::parseFile() {
             parsePerspectiveCamera();
         // } else if (!strcmp(token, "Background")) {
         //     parseBackground();
-        // } else if (!strcmp(token, "Lights")) {
-        //     parseLights();
+        } else if (!strcmp(token, "Lights")) {
+            parseLights();
         } else if (!strcmp(token, "Materials")) {
             parseMaterials();
         } else if (!strcmp(token, "Group")) {
@@ -169,12 +169,17 @@ void SceneParser::parseLights() {
     Vector3f pos, color;
     while (num_lights > count) {
         getToken(token);
+        assert (!strcmp(token, "Light"));
+        getToken(token);
+        assert (!strcmp(token, "{"));
+        getToken(token);
         if (strcmp(token, "color") == 0) 
             color = readVector3f();
         else{
             printf("Unknown token in parseLight: '%s'\n", token);
             exit(0);
         }
+        getToken(token);
         if (strcmp(token, "position") == 0) 
             pos = readVector3f();
         else{
@@ -183,6 +188,8 @@ void SceneParser::parseLights() {
         }
         lights[count] = new Light(pos, color);
         count++;
+        getToken(token);
+        assert (!strcmp(token, "}"));
     }
     getToken(token);
     assert (!strcmp(token, "}"));

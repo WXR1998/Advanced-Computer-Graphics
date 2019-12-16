@@ -3,16 +3,25 @@ PerspectiveCamera {
     direction 0 0 -1
     up 0 1 0
     angle 60 
-    width 200
-    height 200
-    aperture 0
+    width 300
+    height 300
+    aperture 10
+}
+
+Lights {
+    numLights 1
+    Light {
+        color 3 3 3
+        position 3 3 3
+    }
 }
 
 Materials {
     numMaterials 8
     Material {
-        diffuseColor 0.6 0.8 0.4
+        diffuseColor 1 1 1 
         diffuse
+        texture mesh/wood.bmp 10 10
 	}
     Material {
         diffuseColor 0.8 0.4 0.6

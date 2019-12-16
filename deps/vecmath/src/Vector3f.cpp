@@ -355,7 +355,7 @@ double Vector3f::power(){
 	return ( x() + y() + z() ) / 3.0f;
 }
 
-bool Vector3f::isBlack(){
+bool Vector3f::isBlack() const{
 	return std::fabs(x()) < eps && std::fabs(y()) < eps && std::fabs(z()) < eps;
 }
 

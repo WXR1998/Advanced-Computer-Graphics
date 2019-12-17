@@ -1,18 +1,18 @@
 PerspectiveCamera {
-    center 0 0 10
+    center 0 5 10
     direction 0 0 -1
     up 0 1 0
-    angle 60 
+    angle 70
     width 300
     height 300
-    aperture 10
+    aperture 0
 }
 
 Lights {
     numLights 1
     Light {
         color 3 3 3
-        position 3 3 3
+        position 3 8 3
     }
 }
 
@@ -24,15 +24,17 @@ Materials {
         texture mesh/wood.bmp 10 10
 	}
     Material {
-        diffuseColor 0.8 0.4 0.6
+        diffuseColor 0.6 0.6 0.6
         diffuse
 	}
     Material {
-        diffuseColor 0.4 0.6 0.8
+        diffuseColor 0.8 0.8 0.8 
         diffuse
 	}
     Material {
-        shine 5 5 5 
+        diffuseColor 1 1 1 
+        diffuse
+        texture mesh/marble.bmp
     }
     Material {
         diffuseColor 0.9 0.9 1
@@ -84,32 +86,40 @@ Group {
     MaterialIndex 2
     Plane {
         normal 0 -1 0
-        offset -5
+        offset 0 
     }
     Plane {
         normal 0 1 0
-        offset -5
+        offset 10
     }
 
     MaterialIndex 5
     Sphere {
-        center 2.5 3 3
+        center 2.5 8 3
         radius 1
     }
     Sphere {
-        center -2.5 3 0
+        center -2.5 8 0
         radius 1
     }
     MaterialIndex 4
     Sphere {
-        center 0 -3 -3
+        center 0 7 -3
         radius 1
     }
 
-    MaterialIndex 3
-    Sphere {
-        center 0 100000 0
-        radius 99995.00005
+    MaterialIndex 6
+    RevSurface {
+        profile BezierCurve {
+            controls
+                [ 1.75     0       0 ]
+                [ 2.25     1.5    0 ]
+                [ 2.5      2       0 ]
+                [ 2.25     2.5    0 ]
+                [ 1.75     3     0 ]
+                [ 1       5     0 ]
+                [ 1.5      7     0 ]
+        }
     }
 }
 

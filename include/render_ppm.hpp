@@ -22,6 +22,10 @@
 extern const double eps;
 extern const int MAX_DEP;
 
+Vector3f specularShineness(Vector3f specCol, Vector3f textCol, double shineness){
+    return specCol * shineness + textCol * (1 - shineness);
+}
+
 /*
     相机发出光线ray，其在图像buffer中的下标为index，把所有漫反射点放入sightpoint
     colorCoef:  当前走过的光路中，各种衰减的叠加
@@ -48,21 +52,22 @@ void camera_pass(Ray ray, int dep, int index, std::vector<SPPMNode> &sightpoint,
                 break;
             case SPECULAR:
                 camera_pass(gr.reflect, dep+1, index, sightpoint, radius, group, 
-                    colorCoef * mat->getSpecularColor() * textureCoef, prob);
+                    colorCoef * specularShineness(mat->getSpecularColor(), textureCoef, 
+                    mat->getShineness()), prob);
                 break;
             case TRANSPARENT:
                 P = 0.25 + 0.5 * gr.reflectRatio;
                 if (dep > 2){
                     if (erand48(X) < P)
                         camera_pass(gr.reflect, dep+1, index, sightpoint, radius, group, 
-                            colorCoef * mat->getSpecularColor() * textureCoef, 
+                            colorCoef * specularShineness(mat->getSpecularColor(), textureCoef, mat->getShineness()), 
                             prob * gr.reflectRatio / P);
                     else
                         camera_pass(gr.refract, dep+1, index, sightpoint, radius, group, 
                             colorCoef * textureCoef, prob * gr.refractRatio / (1 - P));
                 }else{
                     camera_pass(gr.reflect, dep+1, index, sightpoint, radius, group, 
-                        colorCoef * mat->getSpecularColor() * textureCoef, prob * gr.reflectRatio);
+                        colorCoef * specularShineness(mat->getSpecularColor(), textureCoef, mat->getShineness()), prob * gr.reflectRatio);
                     camera_pass(gr.refract, dep+1, index, sightpoint, radius, group, 
                         colorCoef * textureCoef, prob * gr.refractRatio);
                 }
@@ -96,18 +101,18 @@ void light_pass(Ray ray, int dep, Vector3f color, PixelColor *c, KDTree &tree, G
                 break;
             case SPECULAR:
                 light_pass(gr.reflect, dep+1, 
-                    color * mat->getSpecularColor() * textureCoef, c, tree, group, prob);
+                    color * specularShineness(mat->getSpecularColor(), textureCoef, mat->getShineness()), c, tree, group, prob);
                 break;
             case TRANSPARENT:
                 P = 0.25 + 0.5 * gr.reflectRatio;
                 if (dep > 2){
                     if (erand48(X) < P)
-                        light_pass(gr.reflect, dep+1, color * mat->getSpecularColor() * textureCoef, c, tree, group, prob * gr.reflectRatio / P);
+                        light_pass(gr.reflect, dep+1, color * specularShineness(mat->getSpecularColor(), textureCoef, mat->getShineness()), c, tree, group, prob * gr.reflectRatio / P);
                     else
                         light_pass(gr.refract, dep+1, color * textureCoef,
                             c, tree, group, prob * gr.refractRatio / (1 - P));
                 }else{
-                    light_pass(gr.reflect, dep+1, color * mat->getSpecularColor() * textureCoef, c, tree, group, prob * gr.reflectRatio);
+                    light_pass(gr.reflect, dep+1, color * specularShineness(mat->getSpecularColor(), textureCoef, mat->getShineness()), c, tree, group, prob * gr.reflectRatio);
                     light_pass(gr.refract, dep+1, color * textureCoef,
                         c, tree, group, prob * gr.refractRatio);
                 }

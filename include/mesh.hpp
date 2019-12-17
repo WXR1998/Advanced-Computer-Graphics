@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <cstdio>
+#include "sphere.hpp"
 #include "object3d.hpp"
 #include "triangle.hpp"
 #include "Vector2f.h"
@@ -12,7 +13,7 @@
 class Mesh : public Object3D {
 
 public:
-    Mesh(const char *filename, Material *m);
+    Mesh(const char *filename, Material *m, Vector3f bias = Vector3f::ZERO, double ratio = 1.0);
 
     struct TriangleIndex {
         TriangleIndex() {
@@ -28,17 +29,11 @@ public:
     std::vector<Vector3f> n;
     bool intersect(const Ray &r, Hit &h, double tmin) override;
 
-    // void drawGL() override {
-    //     for (std::vector<TriangleIndex>::iterator i = t.begin(); i != t.end(); i++){
-    //         Triangle tri(v[(*i)[0]], v[(*i)[1]], v[(*i)[2]], this->material);
-    //         tri.drawGL();
-    //     }
-    // }
-
 private:
 
     // Normal can be used for light estimation
     void computeNormal();
+    Sphere boundingSphere;
 };
 
 #endif

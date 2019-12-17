@@ -1,6 +1,6 @@
 PerspectiveCamera {
-    center 0 5 10
-    direction 0 0 -1
+    center 3 2 10
+    direction -0.3 0.1 -1
     up 0 1 0
     angle 70
     width 300
@@ -9,32 +9,75 @@ PerspectiveCamera {
 }
 
 Lights {
-    numLights 1
+    numLights 3
     Light {
-        color 3 3 3
-        position 3 8 3
+        color 4 4 4
+        position -3 9 -3
+    }
+    Light {
+        color 1 1 1
+        position 0 5 5
+    }
+    Light {
+        color 2 2 2
+        position 2 1.5 3
     }
 }
 
 Materials {
-    numMaterials 8
+    numMaterials 14
     Material {
         diffuseColor 1 1 1 
         diffuse
-        texture mesh/wood.bmp 10 10
-	}
-    Material {
-        diffuseColor 0.6 0.6 0.6
-        diffuse
-	}
-    Material {
-        diffuseColor 0.8 0.8 0.8 
-        diffuse
+        texture mesh/wood.bmp 2 2
 	}
     Material {
         diffuseColor 1 1 1 
         diffuse
-        texture mesh/marble.bmp
+        texture mesh/wood2.bmp 10 5
+	}
+    Material {
+        diffuseColor 1 1 1 
+        diffuse
+        texture mesh/wood3.bmp 4 4
+	}
+    Material {
+        diffuseColor 1 1 1 
+        diffuse
+        texture mesh/carpet.bmp 5 5
+	}
+    Material {
+        diffuseColor 1 1 1 
+        diffuse
+        texture mesh/brick.bmp 5 5
+	}
+    Material {
+        diffuseColor 1 1 1 
+        diffuse
+        texture mesh/leather.bmp 10 10
+	}
+    Material {
+        diffuseColor 1 1 1 
+        diffuse
+        texture mesh/marble.bmp 1 1
+    }
+    Material {
+        diffuseColor 0.5 0.5 0.5 
+        diffuse
+        texture mesh/vase.bmp 6.283 -1
+    }
+    Material {
+        diffuseColor 1 1 1
+        diffuse
+        texture mesh/laoba.bmp 3 3
+    }
+    Material {
+        diffuseColor 0.2 0.3 1
+        diffuse
+	}
+    Material {
+        diffuseColor 1 0.3 0.2
+        diffuse
     }
     Material {
         diffuseColor 0.9 0.9 1
@@ -45,25 +88,18 @@ Materials {
         diffuseColor 1 1 1 
         specularColor 1 1 1
         transparent
-        iota 2
+        iota 1.2
 	}
-
     Material {
-        diffuseColor 1 1 1
+        diffuseColor 0.4 1 0.2
         diffuse
-        texture mesh/vase.bmp 6.283 1
-    }
-    Material {
-        diffuseColor 1 1 1
-        diffuse
-        texture mesh/laoba.bmp 3 3
     }
 }
 
 Group {
-    numObjects 10
+    numObjects 17
 
-    MaterialIndex 0
+    MaterialIndex 4
     Plane {
         normal 0 0 -1
         offset 5
@@ -83,43 +119,80 @@ Group {
         offset -5
     }
 
-    MaterialIndex 2
+    MaterialIndex 3
     Plane {
         normal 0 -1 0
         offset 0 
     }
+    MaterialIndex 2
     Plane {
         normal 0 1 0
         offset 10
     }
 
-    MaterialIndex 5
+    MaterialIndex 12
     Sphere {
-        center 2.5 8 3
-        radius 1
+        center -3.9 1.1 -3.4
+        radius 1.1
+    }
+    MaterialIndex 11
+    Sphere {
+        center -4.1 0.9 -1.6
+        radius 0.9
+    }
+    MaterialIndex 10
+    Sphere {
+        center -4.3 0.7 0
+        radius 0.7
+    }
+    MaterialIndex 9
+    Sphere {
+        center -4.5 0.5 1.2
+        radius 0.5
+    }
+    MaterialIndex 6
+    Sphere {
+        center -4.7 0.3 2
+        radius 0.3
     }
     Sphere {
-        center -2.5 8 0
-        radius 1
-    }
-    MaterialIndex 4
-    Sphere {
-        center 0 7 -3
-        radius 1
+        center -4.9 0.1 2.4
+        radius 0.2
     }
 
-    MaterialIndex 6
+    Material 13 
+    Sphere {
+        center -4 0.5 2
+        radius 0.5
+    }
+    Sphere {
+        center -3 0.5 3
+        radius 0.5
+    }
+
+    MaterialIndex 12
+    TriangleMesh {
+        obj_file mesh/bunny_1k.obj 10   2 -0.6 3
+    }
+
+    MaterialIndex 7
     RevSurface {
         profile BezierCurve {
             controls
-                [ 1.75     0       0 ]
-                [ 2.25     1.5    0 ]
-                [ 2.5      2       0 ]
-                [ 2.25     2.5    0 ]
-                [ 1.75     3     0 ]
-                [ 1       5     0 ]
-                [ 1.5      7     0 ]
+                [ 1.25     0       0 ]
+                [ 1.75     1.5    0 ]
+                [ 2      2       0 ]
+                [ 1.75     2.5    0 ]
+                [ 1.25     3     0 ]
+                [ 0.8       5     0 ]
+                [ 1      7     0 ]
         }
+    }
+
+    MaterialIndex 11
+    Sphere {
+        center 5 0 -5
+        radius 5
     }
 }
 

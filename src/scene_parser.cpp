@@ -272,8 +272,8 @@ Material *SceneParser::parseMaterial() {
             diffuseColor = readVector3f();
         } else if (strcmp(token, "specularColor") == 0) {
             specularColor = readVector3f();
-        // } else if (strcmp(token, "shininess") == 0) {
-        //     shininess = readFloat();
+        } else if (strcmp(token, "shininess") == 0) {
+            shininess = readFloat();
         } else if (strcmp(token, "texture") == 0) {
             getToken(filename);
             bmp = new Bmp();
@@ -445,17 +445,21 @@ Triangle *SceneParser::parseTriangle() {
 Mesh *SceneParser::parseTriangleMesh() {
     char token[MAX_PARSER_TOKEN_LENGTH];
     char filename[MAX_PARSER_TOKEN_LENGTH];
+    double ratio;
+    Vector3f bias;
     // get the filename
     getToken(token);
     assert (!strcmp(token, "{"));
     getToken(token);
     assert (!strcmp(token, "obj_file"));
     getToken(filename);
+    ratio = readFloat();
+    bias = readVector3f();
     getToken(token);
     assert (!strcmp(token, "}"));
     const char *ext = &filename[strlen(filename) - 4];
     assert(!strcmp(ext, ".obj"));
-    Mesh *answer = new Mesh(filename, current_material);
+    Mesh *answer = new Mesh(filename, current_material, bias, ratio);
 
     return answer;
 }

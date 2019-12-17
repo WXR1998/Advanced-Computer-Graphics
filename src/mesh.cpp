@@ -8,7 +8,9 @@
 
 bool Mesh::intersect(const Ray &r, Hit &h, double tmin) {
 
-    // Optional: Change this brute force method into a faster one.
+    Hit th;
+    if (!boundingSphere.intersect(r, th, tmin)) return false;
+
     bool result = false;
     for (int triId = 0; triId < (int) t.size(); ++triId) {
         TriangleIndex& triIndex = t[triId];
@@ -20,7 +22,7 @@ bool Mesh::intersect(const Ray &r, Hit &h, double tmin) {
     return result;
 }
 
-Mesh::Mesh(const char *filename, Material *material) : Object3D(material) {
+Mesh::Mesh(const char *filename, Material *material, Vector3f bias, double ratio) : Object3D(material) {
 
     // Optional: Use tiny obj loader to replace this simple one.
     std::ifstream f;
@@ -52,6 +54,7 @@ Mesh::Mesh(const char *filename, Material *material) : Object3D(material) {
         if (tok == vTok) {
             Vector3f vec;
             ss >> vec[0] >> vec[1] >> vec[2];
+            vec = vec * ratio + bias;
             v.push_back(vec);
         } else if (tok == fTok) {
             if (line.find(bslash) != std::string::npos) {
@@ -79,6 +82,13 @@ Mesh::Mesh(const char *filename, Material *material) : Object3D(material) {
         }
     }
     computeNormal();
+    Vector3f sumO(0, 0, 0);
+    for (int i = 0, lim = v.size(); i < lim; ++i)
+        sumO = sumO + v[i] / lim;
+    double r = 0;
+    for (int i = 0, lim = v.size(); i < lim; ++i)
+        r = max(r, (sumO - v[i]).length());
+    boundingSphere = Sphere(sumO, r, nullptr);
 
     f.close();
 }

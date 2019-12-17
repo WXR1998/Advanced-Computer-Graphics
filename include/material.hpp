@@ -55,6 +55,9 @@ public:
     Bmp* getTexture() const{
         return texture;
     }
+    double getShineness() const{
+        return shininess;
+    }
 
 
     double min(double a, double b){ return a<b?a:b; }

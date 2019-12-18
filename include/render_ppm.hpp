@@ -64,12 +64,12 @@ void camera_pass(Ray ray, int dep, int index, std::vector<SPPMNode> &sightpoint,
                             prob * gr.reflectRatio / P);
                     else
                         camera_pass(gr.refract, dep+1, index, sightpoint, radius, group, 
-                            colorCoef * textureCoef, prob * gr.refractRatio / (1 - P));
+                            colorCoef * mat->getDiffuseColor() * textureCoef, prob * gr.refractRatio / (1 - P));
                 }else{
                     camera_pass(gr.reflect, dep+1, index, sightpoint, radius, group, 
                         colorCoef * specularShineness(mat->getSpecularColor(), textureCoef, mat->getShineness()), prob * gr.reflectRatio);
                     camera_pass(gr.refract, dep+1, index, sightpoint, radius, group, 
-                        colorCoef * textureCoef, prob * gr.refractRatio);
+                        colorCoef * mat->getDiffuseColor() * textureCoef, prob * gr.refractRatio);
                 }
                 break;
         }
@@ -109,11 +109,11 @@ void light_pass(Ray ray, int dep, Vector3f color, PixelColor *c, KDTree &tree, G
                     if (erand48(X) < P)
                         light_pass(gr.reflect, dep+1, color * specularShineness(mat->getSpecularColor(), textureCoef, mat->getShineness()), c, tree, group, prob * gr.reflectRatio / P);
                     else
-                        light_pass(gr.refract, dep+1, color * textureCoef,
+                        light_pass(gr.refract, dep+1, color * mat->getDiffuseColor() * textureCoef,
                             c, tree, group, prob * gr.refractRatio / (1 - P));
                 }else{
                     light_pass(gr.reflect, dep+1, color * specularShineness(mat->getSpecularColor(), textureCoef, mat->getShineness()), c, tree, group, prob * gr.reflectRatio);
-                    light_pass(gr.refract, dep+1, color * textureCoef,
+                    light_pass(gr.refract, dep+1, color * mat->getDiffuseColor() * textureCoef,
                         c, tree, group, prob * gr.refractRatio);
                 }
         }

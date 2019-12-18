@@ -29,4 +29,4 @@ mkdir -p output
 # bin/Proj testcases/scene11_bunny_ffd.txt output/scene11.bmp
 # bin/Proj testcases/scene12_cylinder_ffd.txt output/scene12.bmp
 # bin/Proj testcases/scene13_fish_ffd.txt output/scene13.bmp
-bin/Proj testcases/scene.txt output/scene.bmp ppm 10 0.2 1.3 3
+bin/Proj testcases/scene.txt output/scene.bmp ppm 100 0.2 1.05 3

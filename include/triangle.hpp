@@ -41,9 +41,10 @@ public:
 				if (op.length() < h.getT()){
 					h.set(op.length(), 
 						material, 
+						Vector3f::dot(r.getDirection(), normal) <= 0 ? normal : -normal,
 						r.getDirection(),
 						P, 
-						normal);
+						nullptr);
 					return true;
 				}
 		}

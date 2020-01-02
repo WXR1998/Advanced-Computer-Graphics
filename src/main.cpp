@@ -32,6 +32,15 @@
 
 using namespace std;
 
+// 判断文件是否存在
+inline bool exists(const std::string& name) {
+    if (FILE *file = fopen(name.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else
+        return false;
+}
+
 SceneParser *sceneParser;
 Camera *cam;
 Image *image;
@@ -42,6 +51,23 @@ bool debug = false;
 
 const double eps = 1e-6;
 const int MAX_DEP = 6;
+
+void dumpPixels(PixelColor *pixels, int len, string filename){
+    FILE *fout = fopen(filename.c_str(), "w");
+    for (int i = 0; i < len; ++i)
+        fprintf(fout, "%lf %lf %lf %lf\n", pixels[i].strength, 
+            pixels[i].sumColor.x(), pixels[i].sumColor.y(), pixels[i].sumColor.z());
+    fclose(fout);
+}
+
+void loadPixels(PixelColor *pixels, int len, string filename){
+    FILE *fin = fopen(filename.c_str(), "r");
+    for (int i = 0; i < len; ++i){
+        double x, y, z;
+        fscanf(fin, "%lf%lf%lf%lf", &pixels[i].strength, &x, &y, &z);
+        pixels[i].sumColor = Vector3f(x, y, z);
+    }
+}
 
 void pt(){
     const int PT_SAMP = 200;
@@ -93,12 +119,27 @@ void ppm(int argc, char *argv[]){
     int sight_point_count = 0;
     int pixel_count = limx * limy;
 
+    // 寻找最新的结果
+    int starting_iter = -1;
+    char buf[100];
+    for (int iter = 0; iter < ITER; ++iter){
+        sprintf(buf, "logs/%03d.txt", iter);
+        if (exists(string(buf)))
+            starting_iter = iter;
+    }
+    if (starting_iter > -1){
+        sprintf(buf, "logs/%03d.txt", starting_iter);
+        loadPixels(total, pixel_count, string(buf));
+    }
+
     for (int iter = 0; iter < ITER; ++iter){
         printf("Iteration %5d start...\n", iter);
         if (iter > 0){
             samp_count /= sqrt(alpha);
             radius *= alpha;
         }
+        if (iter <= starting_iter)
+            continue;
         #pragma omp parallel for num_threads(thread_count) schedule(dynamic, 1)
         for (int x = 0; x < limx; ++ x){
             int thread_num = omp_get_thread_num();
@@ -167,6 +208,9 @@ void ppm(int argc, char *argv[]){
             image->SetPixel(i % limx, i / limx, total[i].getColor());
         }
         image->SaveBMP(argv[2]);
+        sprintf(buf, "logs/%03d.txt", iter);
+        dumpPixels(total, pixel_count, string(buf));
+
         printf("Iteration %5d save picture complete.\n", iter);
     }
 

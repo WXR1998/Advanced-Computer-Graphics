@@ -121,8 +121,8 @@ void ppm(int argc, char *argv[]){
                             }
                     }
             }
-            // if (thread_num == 0)
-                // printf("Complete %d / %d\n", x, cam->getWidth());
+            if (thread_num == 0)
+                printf("Complete %d / %d\n", x, cam->getWidth());
         }
         printf("Iteration %5d collect sight points complete. \nTotal sight points = %d\nTotal Pixels = %d\n", iter, sight_point_count, pixel_count);
 

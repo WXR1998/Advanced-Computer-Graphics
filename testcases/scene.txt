@@ -3,9 +3,9 @@ PerspectiveCamera {
     direction -0.3 0.1 -1
     up 0 1 0
     angle 70
-    width 1000
-    height 1000
-    aperture 5
+    width 1500
+    height 1500
+    aperture 10
 }
 
 Lights {
@@ -199,7 +199,7 @@ Group {
 
     MaterialIndex 12
     TriangleMesh {
-        obj_file mesh/bunny_1k.obj 10   2.5 -0.7 3.5
+        obj_file mesh/bunny_200.obj 10   2.5 -0.7 3.5
     }
 
     MaterialIndex 7
